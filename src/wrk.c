@@ -15,6 +15,7 @@ static struct config {
     bool     latency;
     char    *host;
     char    *script;
+    enum TlsVersion tls_version;
     SSL_CTX *ctx;
 } cfg;
 
@@ -52,6 +53,9 @@ static void usage() {
            "    -H, --header      <H>  Add header to request      \n"
            "        --latency          Print latency statistics   \n"
            "        --timeout     <T>  Socket/request timeout     \n"
+           "        --tls1.1      <N>  Use only TLS version 1.1   \n"
+           "        --tls1.2      <N>  Use only TLS version 1.2   \n"
+           "        --tls1.3      <N>  Use only TLS version 1.3   \n"
            "    -v, --version          Print version details      \n"
            "                                                      \n"
            "  Numeric arguments may include a SI unit (1k, 1M, 1G)\n"
@@ -73,7 +77,7 @@ int main(int argc, char **argv) {
     char *service = port ? port : schema;
 
     if (!strncmp("https", schema, 5)) {
-        if ((cfg.ctx = ssl_init()) == NULL) {
+        if ((cfg.ctx = ssl_init(cfg.tls_version)) == NULL) {
             fprintf(stderr, "unable to initialize SSL\n");
             ERR_print_errors_fp(stderr);
             exit(1);
@@ -474,6 +478,9 @@ static struct option longopts[] = {
     { "header",      required_argument, NULL, 'H' },
     { "latency",     no_argument,       NULL, 'L' },
     { "timeout",     required_argument, NULL, 'T' },
+    { "tls1.1",      no_argument,       NULL, 'x' },
+    { "tls1.2",      no_argument,       NULL, 'y' },
+    { "tls1.3",      no_argument,       NULL, 'z' },
     { "help",        no_argument,       NULL, 'h' },
     { "version",     no_argument,       NULL, 'v' },
     { NULL,          0,                 NULL,  0  }
@@ -488,8 +495,9 @@ static int parse_args(struct config *cfg, char **url, struct http_parser_url *pa
     cfg->connections = 10;
     cfg->duration    = 10;
     cfg->timeout     = SOCKET_TIMEOUT_MS;
+    cfg->tls_version = TLS_AUTOMATIC;
 
-    while ((c = getopt_long(argc, argv, "t:c:d:s:H:T:Lrv?", longopts, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "t:c:d:s:H:T:xyzLrv?", longopts, NULL)) != -1) {
         switch (c) {
             case 't':
                 if (scan_metric(optarg, &cfg->threads)) return -1;
@@ -512,6 +520,15 @@ static int parse_args(struct config *cfg, char **url, struct http_parser_url *pa
             case 'T':
                 if (scan_time(optarg, &cfg->timeout)) return -1;
                 cfg->timeout *= 1000;
+                break;
+            case 'x':
+                cfg->tls_version = TLS_1_1;
+                break;
+            case 'y':
+                cfg->tls_version = TLS_1_2;
+                break;
+            case 'z':
+                cfg->tls_version = TLS_1_3;
                 break;
             case 'v':
                 printf("wrk %s [%s] ", VERSION, aeGetApiName());

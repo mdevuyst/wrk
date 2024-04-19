@@ -3,7 +3,14 @@
 
 #include "net.h"
 
-SSL_CTX *ssl_init();
+enum TlsVersion {
+    TLS_AUTOMATIC = 0,
+    TLS_1_1,
+    TLS_1_2,
+    TLS_1_3
+};
+
+SSL_CTX *ssl_init(enum TlsVersion tls_version);
 
 status ssl_connect(connection *, char *);
 status ssl_close(connection *);

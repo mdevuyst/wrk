@@ -8,7 +8,7 @@
 
 #include "ssl.h"
 
-SSL_CTX *ssl_init() {
+SSL_CTX *ssl_init(enum TlsVersion tls_version) {
     SSL_CTX *ctx = NULL;
 
     SSL_load_error_strings();
@@ -18,6 +18,23 @@ SSL_CTX *ssl_init() {
     if ((ctx = SSL_CTX_new(SSLv23_client_method()))) {
         SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
         SSL_CTX_set_verify_depth(ctx, 0);
+        switch (tls_version) {
+            case TLS_1_1:
+                SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
+                SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
+                break;
+            case TLS_1_2:
+                SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
+                SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+                break;
+            case TLS_1_3:
+                SSL_CTX_set_min_proto_version(ctx, TLS1_3_VERSION);
+                SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
+                break;
+            case TLS_AUTOMATIC:
+            default:
+                break;
+        }
         SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
         SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_CLIENT);
     }
