@@ -44,6 +44,12 @@
         --timeout:     record a timeout if a response is not received within
                        this amount of time.
 
+        --tls1.1:      Use TLS version 1.1 for HTTPS requests
+
+        --tls1.2:      Use TLS version 1.2 for HTTPS requests
+
+        --tls1.3:      Use TLS version 1.3 for HTTPS requests
+
 ## Benchmarking Tips
 
   The machine running wrk must have a sufficient number of ephemeral ports
