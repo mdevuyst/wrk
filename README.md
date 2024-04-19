@@ -50,6 +50,8 @@
 
         --tls1.3:      Use TLS version 1.3 for HTTPS requests
 
+    -C, --connect-to:  Connect to the specified IP address or hostname
+
 ## Benchmarking Tips
 
   The machine running wrk must have a sufficient number of ephemeral ports
